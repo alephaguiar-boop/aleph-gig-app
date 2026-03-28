@@ -1,0 +1,9 @@
+{
+  "name": "Aleph Gig Promo",
+  "short_name": "Gig Promo",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#10131a",
+  "theme_color": "#10131a",
+  "icons": []
+}
