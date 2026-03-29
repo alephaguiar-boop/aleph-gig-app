@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Aleph Master Control v1.6</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            --bg: #020617;
+            --card: #1e293b;
+            --accent: #3b82f6;
+            --text: #f8fafc;
+            --danger: #ef4444;
+            --gold: #f59e0b;
+            --success: #22c55e;
+            --muted: #94a3b8;
+            --line: #334155;
+            --input: #0f172a;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, system-ui, sans-serif;
+            margin: 0;
+            padding-bottom: 140px;
+        }
+        header {
+            padding: 50px 20px 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 100;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.2s;
+        }
+        .active { display: block; }
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--line);
+            position: relative;
+            overflow: hidden;
+        }
+        .status-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+        }
+        .bg-red { background: var(--danger); }
+        .bg-gold { background: var(--gold); }
+        .bg-green { background: var(--success); }
+        .bg-gray { background: #64748b; }
+
+        .btn, .btn-link {
+            background: var(--accent);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            border: none;
+            width: 100%;
+            margin-top: 10px;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-sec { background: #334155; font-size: 13px; padding: 12px; }
+        .btn-green { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-refresh {
+            background: var(--success);
+            font-size: 11px;
+            padding: 8px 14px;
+            width: auto;
+            margin: 0;
+            line-height: 1;
+            border-radius: 30px;
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            font-weight: 900;
+        }
+        .row { display: flex; gap: 10px; }
+        .row > * { flex: 1; }
+
+        .type-picker {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .type-btn {
+            flex: 1;
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 900;
+            opacity: 0.4;
+            cursor: pointer;
+        }
+        .type-btn.active-type {
+            background: var(--accent);
+            opacity: 1;
+        }
+
+        input, textarea, select {
+            background: var(--input);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 14px;
+            width: 100%;
+            color: white;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        label {
+            display: block;
+            margin-top: 14px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+        .badge-red { background: var(--danger); color: white; }
+        .badge-gold { background: var(--gold); color: black; }
+        .badge-green { background: var(--success); color: white; }
+        .badge-gray { background: #64748b; color: white; }
+
+        .muted { color: var(--muted); }
+        .small { font-size: 12px; }
+        .tiny { font-size: 11px; }
+
+        #story-view {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 2000;
+            padding: 100px 40px;
+            text-align: center;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border-top: 1px solid var(--line);
+            display: flex;
+            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 18px 10px;
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .nav-item.active-nav {
+            color: var(--accent);
+            border-top: 3px solid var(--accent);
+        }
+
+        .venue-chip {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--line);
+            margin: 16px 0;
+        }
+
+        .search-box {
+            margin-bottom: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--muted);
+            padding: 30px 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="story-view" onclick="this.style.display='none'">
+        <div style="color:var(--accent); letter-spacing:10px; font-weight:900; font-size:14px">LIVE MUSIC</div>
+        <div id="st-title" style="font-size:48px; font-weight:900; color:#fff; margin:30px 0; line-height:1; text-transform:uppercase"></div>
+        <div id="st-venue" style="font-size:24px; color:var(--accent); letter-spacing:4px; font-weight:300"></div>
+        <div id="st-date" style="font-size:20px; margin-top:20px; color:white; font-weight:700"></div>
+        <div id="st-cta" style="font-size:14px; margin-top:30px; color:#cbd5e1; letter-spacing:3px; font-weight:800"></div>
+    </div>
+
+    <header>
+        <h1 style="letter-spacing:-1px; margin:0">ALEPH GIGS</h1>
+        <div style="display:flex; gap:8px; align-items:center">
+            <button onclick="addGig()" style="background:#334155; border:none; color:white; padding:10px 14px; border-radius:30px; font-size:12px; font-weight:900">+ ADD</button>
+            <button onclick="syncCalendar()" style="background:var(--accent); border:none; color:white; padding:10px 18px; border-radius:30px; font-size:12px; font-weight:900">SYNC</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="view-home" class="tab-content active">
+            <div id="gig-list"></div>
+        </section>
+
+        <section id="view-invites" class="tab-content">
+            <h3>Invite Manager</h3>
+            <div class="card">
+                <div class="small muted" style="margin-bottom:10px">One per line: Name, City</div>
+                <textarea id="contact-list" rows="15" placeholder="John, Brighton&#10;Maria, London&#10;Sam, Manchester" onchange="saveData()"></textarea>
+            </div>
+            <div class="card">
+                <button class="btn btn-sec" onclick="copyAllContacts()">COPY CONTACT LIST</button>
+            </div>
+        </section>
+
+        <section id="view-venues" class="tab-content">
+            <h3>Venue Database</h3>
+            <input id="venue-search" class="search-box" type="text" placeholder="Search venue or city" oninput="renderVenues()">
+            <div id="venue-list"></div>
+        </section>
+
+        <section id="view-setup" class="tab-content">
+            <div class="card">
+                <h3>System Setup</h3>
+                <label>iCal .ics URL</label>
+                <input type="text" id="set-ical" placeholder="iCal .ics URL" onchange="saveData()">
+
+                <label>Default Lineup</label>
+                <textarea id="set-lineup" rows="3" placeholder="Default Lineup" onchange="saveData()"></textarea>
+
+                <label>Manual ICS Paste</label>
+                <textarea id="set-ics-paste" rows="8" placeholder="Paste raw .ics text here if URL sync fails" onchange="saveData()"></textarea>
+
+                <button class="btn btn-green" onclick="importPastedICS()">IMPORT PASTED ICS</button>
+            </div>
+        </section>
+
+        <section id="view-detail" class="tab-content">
+            <div id="detail-content"></div>
+        </section>
+    </main>
+
+    <nav>
+        <div onclick="showView('home')" class="nav-item active-nav" id="nav-home">Gigs</div>
+        <div onclick="showView('venues')" class="nav-item" id="nav-venues">Venues</div>
+        <div onclick="showView('invites')" class="nav-item" id="nav-invites">Invites</div>
+        <div onclick="showView('setup')" class="nav-item" id="nav-setup">Setup</div>
+    </nav>
+
+    <script>
+        const FULL_VENUE_DB = [
+            { name:"Ronnie Scott's Jazz Club", aliases:["ronnie", "ronnie scott", "ronnie scotts"], city:"London", address:"47 Frith St, London W1D 4HT", capacity:220, website:"https://www.ronniescotts.co.uk", tickets:"https://www.ronniescotts.co.uk", type:"jazz_club" },
+            { name:"606 Club", aliases:["606", "606 club"], city:"London", address:"90 Lots Rd, London SW10 0QD", capacity:120, website:"https://www.606club.co.uk", tickets:"https://www.606club.co.uk/events/", type:"jazz_club" },
+            { name:"Vortex Jazz Club", aliases:["vortex", "vortex jazz"], city:"London", address:"11 Gillett Square, London N16 8AZ", capacity:100, website:"https://www.vortexjazz.co.uk", tickets:"https://www.vortexjazz.co.uk/events/", type:"jazz_club" },
+            { name:"PizzaExpress Live Soho", aliases:["pizzaexpress", "pizza express", "pizzaexpress soho", "pizza express soho"], city:"London", address:"10 Dean St, London W1D 3RW", capacity:120, website:"https://www.pizzaexpresslive.com", tickets:"https://www.pizzaexpresslive.com/whats-on", type:"jazz_club" },
+            { name:"PizzaExpress Live Chelsea", aliases:["pizzaexpress chelsea", "pizza express chelsea", "pizza chelsea"], city:"London", address:"152 King's Rd, London SW3 4UT", capacity:100, website:"https://www.pizzaexpresslive.com", tickets:"https://www.pizzaexpresslive.com/whats-on", type:"jazz_club" },
+            { name:"Jazz Cafe", aliases:["jazz cafe"], city:"London", address:"5 Parkway, Camden, London NW1 7PG", capacity:420, website:"https://thejazzcafelondon.com", tickets:"https://thejazzcafelondon.com", type:"jazz_club" },
+            { name:"Kansas Smitty's", aliases:["kansas smittys", "kansas smitty"], city:"London", address:"Broadway Market, London", capacity:90, website:"https://kansassmittys.com", tickets:"https://kansassmittys.com", type:"jazz_club" },
+            { name:"The Verdict", aliases:["verdict", "the verdict"], city:"Brighton", address:"159 Edward St, Brighton BN2 0JB", capacity:70, website:"https://www.verdictjazz.com", tickets:"https://www.verdictjazz.com/tickets", type:"jazz_club" },
+            { name:"Peggy's Skylight", aliases:["peggy", "peggys", "peggy's"], city:"Nottingham", address:"3 George St, Nottingham NG1 3BH", capacity:100, website:"https://www.peggysskylight.co.uk", tickets:"https://www.peggysskylight.co.uk/events", type:"jazz_club" },
+            { name:"Matt & Phreds", aliases:["matt and phreds", "matt & phreds", "matt phreds"], city:"Manchester", address:"64 Tib St, Manchester M4 1LW", capacity:80, website:"https://mattandphreds.com", tickets:"https://mattandphreds.com", type:"jazz_club" },
+            { name:"Band on the Wall", aliases:["band on the wall"], city:"Manchester", address:"25 Swan St, Manchester M4 5JZ", capacity:340, website:"https://bandonthewall.org", tickets:"https://bandonthewall.org", type:"jazz_friendly" },
+            { name:"The Lescar", aliases:["lescar", "the lescar"], city:"Sheffield", address:"303 Sharrow Vale Rd, Sheffield S11 8ZF", capacity:120, website:"https://lescar.co.uk", tickets:"https://lescar.co.uk", type:"jazz_friendly" },
+            { name:"The Bear Club", aliases:["bear club", "the bear club"], city:"Luton", address:"24A Guildford St, Luton LU1 2NR", capacity:100, website:"https://www.thebearclub.co.uk", tickets:"https://www.thebearclub.co.uk", type:"jazz_club" },
+            { name:"Hideaway", aliases:["hideaway", "hideaway jazz club"], city:"London", address:"2 Empire Mews, London SW16 2BF", capacity:150, website:"https://hideawaylive.co.uk", tickets:"https://hideawaylive.co.uk", type:"jazz_club" },
+            { name:"Seven Arts", aliases:["seven arts"], city:"Leeds", address:"31 Harrogate Rd, Chapel Allerton, Leeds LS7 3PD", capacity:120, website:"https://sevenleeds.co.uk", tickets:"https://sevenleeds.co.uk", type:"arts_centre" },
+            { name:"Eastside Jazz Club", aliases:["eastside", "eastside jazz"], city:"Birmingham", address:"90-92 Allison St, Birmingham B5 5TH", capacity:120, website:"https://www.eastsidejazzclub.co.uk", tickets:"https://www.eastsidejazzclub.co.uk", type:"jazz_club" },
+            { name:"St George's Bristol", aliases:["st george", "st george's bristol"], city:"Bristol", address:"Great George St, Bristol BS1 5RR", capacity:500, website:"https://www.stgeorgesbristol.co.uk", tickets:"https://www.stgeorgesbristol.co.uk", type:"arts_centre" },
+            { name:"The Concorde Club", aliases:["concorde", "the concorde club"], city:"Southampton", address:"Stoneham Ln, Eastleigh SO50 9HQ", capacity:350, website:"https://www.theconcordeclub.com", tickets:"https://www.theconcordeclub.com", type:"jazz_club" },
+            { name:"Jazz Bar Edinburgh", aliases:["jazz bar edinburgh", "the jazz bar"], city:"Edinburgh", address:"1A Chambers St, Edinburgh EH1 1HR", capacity:100, website:"https://www.thejazzbar.co.uk", tickets:"https://www.thejazzbar.co.uk", type:"jazz_club" },
+            { name:"The Blue Lamp", aliases:["blue lamp", "the blue lamp"], city:"Aberdeen", address:"121 Gallowgate, Aberdeen AB25 1BU", capacity:120, website:"https://thebluelampaberdeen.com", tickets:"https://thebluelampaberdeen.com", type:"jazz_club" },
+            { name:"Cluny", aliases:["cluny", "the cluny"], city:"Newcastle", address:"36 Lime St, Newcastle upon Tyne NE1 2PQ", capacity:300, website:"https://thecluny.com", tickets:"https://thecluny.com", type:"jazz_friendly" },
+            { name:"The Met", aliases:["the met", "met bury"], city:"Bury", address:"Market St, Bury BL9 0BW", capacity:300, website:"https://themet.org.uk", tickets:"https://themet.org.uk", type:"arts_centre" },
+            { name:"Black Mountain Jazz", aliases:["black mountain jazz", "brecon jazz"], city:"Brecon", address:"Various venues, Brecon", capacity:200, website:"https://breconjazz.org", tickets:"https://breconjazz.org", type:"festival" },
+            { name:"Love Supreme Festival", aliases:["love supreme"], city:"Glynde", address:"Glynde Place, East Sussex", capacity:20000, website:"https://lovesupremefestival.com", tickets:"https://lovesupremefestival.com", type:"festival" },
+            { name:"EFG London Jazz Festival", aliases:["efg london jazz festival", "london jazz festival"], city:"London", address:"Various venues, London", capacity:2000, website:"https://efglondonjazzfestival.org.uk", tickets:"https://efglondonjazzfestival.org.uk", type:"festival" }
+        ];
+
+        let gigs = JSON.parse(localStorage.getItem('aleph_gigs') || '[]');
+        let setup = JSON.parse(localStorage.getItem('aleph_setup') || '{"ical":"","lineup":"","icsPaste":""}');
+        let contacts = localStorage.getItem('aleph_contacts') || "";
+
+        function saveSetupAndContacts() {
+            localStorage.setItem('aleph_setup', JSON.stringify(setup));
+            localStorage.setItem('aleph_contacts', contacts);
+        }
+
+        function persistGigs() {
+            localStorage.setItem('aleph_gigs', JSON.stringify(gigs));
+        }
+
+        function esc(str) {
+            return String(str || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function normalize(s) {
+            return String(s || '').toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function getVenueData(text) {
+            const source = normalize(text);
+            if (!source) return null;
+
+            return FULL_VENUE_DB.find(v => {
+                if (normalize(v.name).includes(source) || source.includes(normalize(v.name))) return true;
+                return (v.aliases || []).some(a => source.includes(normalize(a)) || normalize(a).includes(source));
+            }) || null;
+        }
+
+        function enrichGig(g) {
+            const match = getVenueData((g.venue || '') + ' ' + (g.title || ''));
+            if (!match) return g;
+
+            if (!g.venue || g.venue.trim() === '') g.venue = match.name;
+            if (!g.city || g.city.trim() === '') g.city = match.city;
+            if (!g.address || g.address.trim() === '') g.address = match.address;
+            if (!g.website || g.website.trim() === '') g.website = match.website;
+            if (!g.ticketUrl || g.ticketUrl.trim() === '') g.ticketUrl = match.tickets;
+            if (!g.cap || Number(g.cap) === 0) g.cap = match.capacity;
+            if (!g.typeCategory || g.typeCategory.trim() === '') g.typeCategory = match.type;
+
+            return g;
+        }
+
+        function getTodayLocalString() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function daysUntil(dateStr) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const target = new Date(dateStr + 'T00:00:00').getTime();
+            return Math.ceil((target - today) / 86400000);
+        }
+
+        function getHealth(g) {
+            const stateType = (g.type || 'ticketed').toLowerCase();
+            if (stateType === 'free' || stateType === 'tbc') return { bar:'bg-gray', badge:'badge-gray', label:stateType.toUpperCase() };
+
+            const cap = Number(g.cap || 0);
+            const sold = Number(g.sold || 0);
+            const target = cap > 0 ? cap : 1;
+            const ratio = sold / target;
+            const days = daysUntil(g.date);
+
+            if (ratio >= 0.8) return { bar:'bg-green', badge:'badge-green', label:'HEALTHY' };
+            if ((days <= 7 && ratio < 0.5) || (days <= 14 && ratio < 0.35)) return { bar:'bg-red', badge:'badge-red', label:'URGENT' };
+            return { bar:'bg-gold', badge:'badge-gold', label:'WATCH' };
+        }
+
+        function showView(v) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+
+            const view = document.getElementById('view-' + v);
+            if (view) view.classList.add('active');
+
+            const nav = document.getElementById('nav-' + v);
+            if (nav) nav.classList.add('active-nav');
+
+            if (v === 'home') renderGigs();
+            if (v === 'venues') renderVenues();
+            if (v === 'setup') hydrateSetup();
+            if (v === 'invites') hydrateContacts();
+
+            window.scrollTo(0, 0);
+        }
+
+        function hydrateSetup() {
+            const icalEl = document.getElementById('set-ical');
+            const lineupEl = document.getElementById('set-lineup');
+            const pasteEl = document.getElementById('set-ics-paste');
+            if (icalEl) icalEl.value = setup.ical || '';
+            if (lineupEl) lineupEl.value = setup.lineup || '';
+            if (pasteEl) pasteEl.value = setup.icsPaste || '';
+        }
+
+        function hydrateContacts() {
+            const el = document.getElementById('contact-list');
+            if (el) el.value = contacts || '';
+        }
+
+        function saveData() {
+            const icalEl = document.getElementById('set-ical');
+            const lineupEl = document.getElementById('set-lineup');
+            const pasteEl = document.getElementById('set-ics-paste');
+            const contactEl = document.getElementById('contact-list');
+
+            if (icalEl) setup.ical = icalEl.value;
+            if (lineupEl) setup.lineup = lineupEl.value;
+            if (pasteEl) setup.icsPaste = pasteEl.value;
+            if (contactEl) contacts = contactEl.value;
+
+            saveSetupAndContacts();
+        }
+
+        function addGig() {
+            const id = Date.now();
+            gigs.unshift(enrichGig({
+                id,
+                title: 'New Gig',
+                venue: '',
+                date: getTodayLocalString(),
+                city: '',
+                address: '',
+                website: '',
+                ticketUrl: '',
+                sold: 0,
+                cap: 0,
+                type: 'tbc',
+                typeCategory: '',
+                notes: ''
+            }));
+            persistGigs();
+            viewDetail(id);
+        }
+
+        function deleteGig(id) {
+            if (!confirm('Delete this gig?')) return;
+            gigs = gigs.filter(g => g.id !== id);
+            persistGigs();
+            showView('home');
+        }
+
+        function renderGigs() {
+            const list = document.getElementById('gig-list');
+            list.innerHTML = '';
+
+            gigs = gigs.map(g => enrichGig(g));
+            persistGigs();
+
+            const today = getTodayLocalString();
+            const upcoming = gigs
+                .filter(g => (g.date || '') >= today)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (!upcoming.length) {
+                list.innerHTML = `<div class="card empty-state">No upcoming gigs yet.<br><br>Tap <b>+ ADD</b> to create one.</div>`;
+                return;
+            }
+
+            upcoming.forEach(g => {
+                const days = daysUntil(g.date);
+                const h = getHealth(g);
+                const label = days === 0 ? 'TONIGHT' : (days > 0 ? `D-${days}` : 'PAST');
+                const venueLine = g.city ? `${g.venue} · ${g.city}` : g.venue;
+
+                list.innerHTML += `
+                    <div class="card" onclick="viewDetail(${g.id})">
+                        <div class="status-bar ${h.bar}"></div>
+                        <div style="display:flex; justify-content:space-between; gap:10px; margin-left:10px; align-items:flex-start">
+                            <div>
+                                <b>${esc(g.title)}</b><br>
+                                <span class="small muted">📍 ${esc(venueLine || 'No venue')}</span>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="color:var(--accent); font-weight:900; font-size:12px">${label}</div>
+                                <div class="badge ${h.badge}" style="margin-top:6px">${h.label}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function viewDetail(id) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+
+            const match = getVenueData((g.venue || '') + ' ' + (g.title || ''));
+            const venueData = match || {};
+            const type = g.type || 'ticketed';
+            const h = getHealth(g);
+            const cap = Number(g.cap || venueData.capacity || 0);
+            const sold = Number(g.sold || 0);
+            const remaining = Math.max(cap - sold, 0);
+            const inviteCount = getMatchingContacts(g.city).length;
+
+            document.getElementById('detail-content').innerHTML = `
+                <div class="type-picker">
+                    <button class="type-btn ${type==='ticketed'?'active-type':''}" onclick="updateType(${id}, 'ticketed')">TICKETED</button>
+                    <button class="type-btn ${type==='free'?'active-type':''}" onclick="updateType(${id}, 'free')">FREE</button>
+                    <button class="type-btn ${type==='tbc'?'active-type':''}" onclick="updateType(${id}, 'tbc')">TBC</button>
+                </div>
+
+                <div class="card">
+                    <h2 style="margin:0">${esc(g.title)}</h2>
+                    <p style="color:var(--accent); margin:8px 0">${esc(g.venue || 'No venue')}</p>
+                    <div class="badge ${h.badge}" style="margin-top:6px">${h.label}</div>
+                    ${g.typeCategory ? `<div class="venue-chip">${esc(g.typeCategory.replaceAll('_',' '))}</div>` : ''}
+
+                    <div class="divider"></div>
+
+                    <label>Gig Title</label>
+                    <input value="${esc(g.title)}" onchange="updateField(${id}, 'title', this.value)">
+
+                    <label>Date</label>
+                    <input type="date" value="${esc(g.date)}" onchange="updateField(${id}, 'date', this.value)">
+
+                    <label>Venue</label>
+                    <input value="${esc(g.venue || '')}" onchange="updateVenueField(${id}, this.value)">
+
+                    <label>City</label>
+                    <input value="${esc(g.city || '')}" onchange="updateField(${id}, 'city', this.value)">
+
+                    <label>Address</label>
+                    <textarea rows="2" onchange="updateField(${id}, 'address', this.value)">${esc(g.address || '')}</textarea>
+
+                    <label>Capacity / Target</label>
+                    <input type="number" value="${cap}" onchange="updateCap(${id}, this.value)">
+
+                    <label>Tickets Sold</label>
+                    <input type="number" value="${sold}" onchange="updateSold(${id}, this.value)">
+
+                    <label>Website</label>
+                    <input value="${esc(g.website || '')}" onchange="updateField(${id}, 'website', this.value)">
+
+                    <label>Ticket Link</label>
+                    <input value="${esc(g.ticketUrl || '')}" onchange="updateField(${id}, 'ticketUrl', this.value)">
+
+                    <label>Notes</label>
+                    <textarea rows="3" onchange="updateField(${id}, 'notes', this.value)">${esc(g.notes || '')}</textarea>
+
+                    <div class="row" style="margin-top:15px">
+                        <button class="btn btn-sec" onclick="openStory(${id})">📸 STORY</button>
+                        <a class="btn btn-sec" href="https://maps.apple.com/?daddr=${encodeURIComponent(g.address || g.venue || '')}" target="_blank" rel="noopener noreferrer">🚗 MAPS</a>
+                    </div>
+
+                    <div class="row">
+                        ${g.ticketUrl ? `<a class="btn-link btn-sec" href="${esc(g.ticketUrl)}" target="_blank" rel="noopener noreferrer">🎟 TICKETS</a>` : `<button class="btn btn-sec" onclick="alert('Add a ticket link first')">🎟 TICKETS</button>`}
+                        ${g.website ? `<a class="btn-link btn-sec" href="${esc(g.website)}" target="_blank" rel="noopener noreferrer">🌐 WEBSITE</a>` : `<button class="btn btn-sec" onclick="alert('Add a website first')">🌐 WEBSITE</button>`}
+                    </div>
+                </div>
+
+                ${type === 'ticketed' ? `
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px">
+                            <div>
+                                <h3 style="margin:0">Sales: ${sold} / ${cap || '-'}</h3>
+                                <div class="small muted">${remaining} remaining</div>
+                            </div>
+                            ${g.ticketUrl ? `<a href="${esc(g.ticketUrl)}" target="_blank" rel="noopener noreferrer" class="btn-refresh">CHECK SITE</a>` : ''}
+                        </div>
+                        <input type="range" min="0" max="${cap || 100}" value="${Math.min(sold, cap || 100)}" onchange="updateSold(${id}, this.value)" style="width:100%; margin-top:20px; accent-color:var(--accent)">
+                    </div>
+                ` : ''}
+
+                <div class="card">
+                    <h3 style="margin:0 0 10px">Strategy</h3>
+                    <div class="small muted" style="margin-bottom:10px">${inviteCount} contact(s) match this city</div>
+                    <button class="btn" onclick="copyCaption(${id})">📝 COPY CAPTION</button>
+                    <button class="btn btn-sec" onclick="generateInvite(${id})">✉️ COPY INVITE</button>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin:0 0 10px">Venue Intelligence</h3>
+                    <div class="small"><b>City:</b> ${esc(g.city || venueData.city || '-')}</div>
+                    <div class="small" style="margin-top:6px"><b>Address:</b> ${esc(g.address || venueData.address || '-')}</div>
+                    <div class="small" style="margin-top:6px"><b>Capacity:</b> ${esc(String(cap || '-'))}</div>
+                    <div class="small" style="margin-top:6px"><b>Category:</b> ${esc((g.typeCategory || venueData.type || '-').replaceAll('_',' '))}</div>
+                </div>
+
+                <button class="btn btn-danger" onclick="deleteGig(${id})">DELETE GIG</button>
+                <button class="btn btn-sec" onclick="showView('home')">← BACK</button>
+            `;
+            showView('detail');
+        }
+
+        function updateField(id, key, val) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+            g[key] = val;
+            persistGigs();
+        }
+
+        function updateVenueField(id, val) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+            g.venue = val;
+
+            const match = getVenueData(val);
+            if (match) {
+                g.venue = match.name;
+                g.city = match.city || g.city || '';
+                g.address = match.address || g.address || '';
+                g.website = match.website || g.website || '';
+                g.ticketUrl = match.tickets || g.ticketUrl || '';
+                g.cap = Number(g.cap || 0) > 0 ? g.cap : match.capacity;
+                g.typeCategory = match.type || g.typeCategory || '';
+            }
+
+            persistGigs();
+            viewDetail(id);
+        }
+
+        function updateSold(id, val) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+            g.sold = parseInt(val || 0, 10);
+            persistGigs();
+            viewDetail(id);
+        }
+
+        function updateCap(id, val) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+            g.cap = parseInt(val || 0, 10);
+            persistGigs();
+            viewDetail(id);
+        }
+
+        function updateType(id, t) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+            g.type = t;
+            persistGigs();
+            viewDetail(id);
+        }
+
+        function openStory(id) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+
+            document.getElementById('st-title').innerText = g.title || '';
+            document.getElementById('st-venue').innerText = (g.venue || '').split(',')[0];
+            document.getElementById('st-date').innerText = g.date || '';
+            document.getElementById('st-cta').innerText =
+                g.type === 'free' ? 'FREE ENTRY' :
+                g.type === 'tbc' ? 'MORE INFO SOON' :
+                'TICKETS AVAILABLE NOW';
+
+            document.getElementById('story-view').style.display = 'block';
+        }
+
+        function getMatchingContacts(city) {
+            if (!city) return [];
+            return contacts
+                .split('\n')
+                .map(x => x.trim())
+                .filter(Boolean)
+                .map(line => {
+                    const parts = line.split(',');
+                    return {
+                        name: (parts[0] || '').trim(),
+                        city: (parts[1] || '').trim()
+                    };
+                })
+                .filter(c => normalize(c.city) === normalize(city));
+        }
+
+        function copyCaption(id) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+
+            const dateText = g.date || '';
+            const venueText = g.venue || '';
+            const cityText = g.city ? `, ${g.city}` : '';
+            const linkText = g.ticketUrl ? `\n${g.ticketUrl}` : '';
+
+            const caption =
+`${g.title}
+${dateText} · ${venueText}${cityText}
+${setup.lineup ? setup.lineup + '\n' : ''}${g.type === 'free' ? 'Free entry.' : g.type === 'tbc' ? 'More info soon.' : 'Tickets available now.'}${linkText}`;
+
+            navigator.clipboard.writeText(caption)
+                .then(() => alert('Caption copied!'))
+                .catch(() => alert(caption));
+        }
+
+        function generateInvite(id) {
+            const g = gigs.find(x => x.id === id);
+            if (!g) return;
+
+            const matches = getMatchingContacts(g.city);
+            const target = matches[0];
+
+            const invite =
+target
+? `Hi ${target.name} — I’m playing at ${g.venue} in ${g.city} on ${g.date}. Would love to see you there.${g.ticketUrl ? ' ' + g.ticketUrl : ''}`
+: `Hi — I’m playing at ${g.venue}${g.city ? ' in ' + g.city : ''} on ${g.date}. Would love to see you there.${g.ticketUrl ? ' ' + g.ticketUrl : ''}`;
+
+            navigator.clipboard.writeText(invite)
+                .then(() => alert(target ? `Invite copied for ${target.name}!` : 'Invite copied!'))
+                .catch(() => alert(invite));
+        }
+
+        function copyAllContacts() {
+            navigator.clipboard.writeText(contacts || '')
+                .then(() => alert('Contact list copied!'))
+                .catch(() => alert(contacts || 'No contacts yet'));
+        }
+
+        function renderVenues() {
+            const list = document.getElementById('venue-list');
+            const search = document.getElementById('venue-search');
+            const q = normalize(search ? search.value : '');
+
+            const items = FULL_VENUE_DB.filter(v => {
+                if (!q) return true;
+                const blob = normalize([v.name, v.city, v.address, v.type, ...(v.aliases || [])].join(' '));
+                return blob.includes(q);
+            });
+
+            if (!items.length) {
+                list.innerHTML = `<div class="card empty-state">No venues found.</div>`;
+                return;
+            }
+
+            list.innerHTML = items.map(v => `
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start">
+                        <div>
+                            <b>${esc(v.name)}</b>
+                            <div class="small muted" style="margin-top:6px">${esc(v.city)}</div>
+                        </div>
+                        <div class="venue-chip">${esc(v.type.replaceAll('_',' '))}</div>
+                    </div>
+
+                    <div class="small" style="margin-top:12px"><b>Address:</b> ${esc(v.address)}</div>
+                    <div class="small" style="margin-top:6px"><b>Capacity:</b> ${esc(String(v.capacity))}</div>
+
+                    <div class="row" style="margin-top:12px">
+                        <a class="btn-link btn-sec" href="${esc(v.tickets)}" target="_blank" rel="noopener noreferrer">Tickets</a>
+                        <a class="btn-link btn-sec" href="${esc(v.website)}" target="_blank" rel="noopener noreferrer">Website</a>
+                    </div>
+
+                    <button class="btn" onclick="addGigFromVenue('${esc(v.name)}')">USE THIS VENUE</button>
+                </div>
+            `).join('');
+        }
+
+        function addGigFromVenue(name) {
+            const match = FULL_VENUE_DB.find(v => v.name === name);
+            if (!match) return;
+
+            const id = Date.now();
+            gigs.unshift({
+                id,
+                title: 'New Gig',
+                venue: match.name,
+                date: getTodayLocalString(),
+                city: match.city,
+                address: match.address,
+                website: match.website,
+                ticketUrl: match.tickets,
+                sold: 0,
+                cap: match.capacity,
+                type: 'tbc',
+                typeCategory: match.type,
+                notes: ''
+            });
+            persistGigs();
+            viewDetail(id);
+        }
+
+        function syncCalendar() {
+            if (!setup.ical && !setup.icsPaste) {
+                alert('Add an iCal URL or paste raw ICS text in Setup first.');
+                return;
+            }
+
+            if (setup.ical) {
+                alert('Browser URL sync can fail because of calendar CORS restrictions. If it fails, use the ICS paste box in Setup.');
+            } else {
+                importPastedICS();
+            }
+        }
+
+        function importPastedICS() {
+            saveData();
+            const raw = setup.icsPaste || '';
+            if (!raw.trim()) {
+                alert('Paste raw ICS text first.');
+                return;
+            }
+
+            const parsed = parseICS(raw);
+            if (!parsed.length) {
+                alert('No events found in pasted ICS text.');
+                return;
+            }
+
+            mergeImportedEvents(parsed);
+            persistGigs();
+            alert(parsed.length + ' event(s) imported.');
+            showView('home');
+        }
+
+        function parseICS(raw) {
+            const blocks = raw.split('BEGIN:VEVENT').slice(1);
+            const out = [];
+
+            blocks.forEach(block => {
+                const endIndex = block.indexOf('END:VEVENT');
+                const b = endIndex >= 0 ? block.slice(0, endIndex) : block;
+
+                const uid = getICSField(b, 'UID');
+                const summary = getICSField(b, 'SUMMARY');
+                const location = getICSField(b, 'LOCATION');
+                const description = getICSField(b, 'DESCRIPTION');
+                const dtstart = getICSDateField(b, 'DTSTART');
+
+                if (!summary || !dtstart) return;
+
+                const match = getVenueData((location || '') + ' ' + summary);
+
+                out.push(enrichGig({
+                    id: uid ? hashCode(uid) : Date.now() + Math.floor(Math.random() * 10000),
+                    title: summary,
+                    venue: location || (match ? match.name : ''),
+                    date: dtstart,
+                    city: match ? match.city : '',
+                    address: match ? match.address : '',
+                    website: match ? match.website : '',
+                    ticketUrl: match ? match.tickets : '',
+                    sold: 0,
+                    cap: match ? match.capacity : 0,
+                    type: 'tbc',
+                    typeCategory: match ? match.type : '',
+                    notes: description || ''
+                }));
+            });
+
+            return out;
+        }
+
+        function getICSField(block, field) {
+            const lines = unfoldICSLines(block);
+            const line = lines.find(l => l.startsWith(field + ':') || l.startsWith(field + ';'));
+            if (!line) return '';
+            const idx = line.indexOf(':');
+            return idx >= 0 ? line.slice(idx + 1).replace(/\\,/g, ',').replace(/\\n/g, '\n').trim() : '';
+        }
+
+        function getICSDateField(block, field) {
+            const lines = unfoldICSLines(block);
+            const line = lines.find(l => l.startsWith(field + ':') || l.startsWith(field + ';'));
+            if (!line) return '';
+            const idx = line.indexOf(':');
+            if (idx < 0) return '';
+            const val = line.slice(idx + 1).trim();
+
+            if (/^\d{8}$/.test(val)) {
+                return `${val.slice(0,4)}-${val.slice(4,6)}-${val.slice(6,8)}`;
+            }
+            if (/^\d{8}T/.test(val)) {
+                return `${val.slice(0,4)}-${val.slice(4,6)}-${val.slice(6,8)}`;
+            }
+            return '';
+        }
+
+        function unfoldICSLines(text) {
+            return text.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '').split(/\r?\n/);
+        }
+
+        function mergeImportedEvents(imported) {
+            imported.forEach(inc => {
+                const existing = gigs.find(g => String(g.id) === String(inc.id));
+                if (existing) {
+                    existing.title = inc.title || existing.title;
+                    existing.venue = inc.venue || existing.venue;
+                    existing.date = inc.date || existing.date;
+                    existing.city = existing.city || inc.city;
+                    existing.address = existing.address || inc.address;
+                    existing.website = existing.website || inc.website;
+                    existing.ticketUrl = existing.ticketUrl || inc.ticketUrl;
+                    existing.cap = existing.cap || inc.cap;
+                    existing.typeCategory = existing.typeCategory || inc.typeCategory;
+                    existing.notes = existing.notes || inc.notes;
+                } else {
+                    gigs.push(inc);
+                }
+            });
+        }
+
+        function hashCode(str) {
+            let h = 0;
+            for (let i = 0; i < str.length; i++) {
+                h = ((h << 5) - h) + str.charCodeAt(i);
+                h |= 0;
+            }
+            return Math.abs(h);
+        }
+
+        hydrateSetup();
+        hydrateContacts();
+        showView('home');
+    </script>
+</body>
+</html>
