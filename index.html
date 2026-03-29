@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Aleph Gigs</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#0b0b0b;
+  --card:#151515;
+  --text:#fff;
+  --muted:#9a9a9a;
+  --green:#2ecc71;
+  --gold:#f1c40f;
+  --red:#e74c3c;
+  --line:#2a2a2a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+}
+.screen{
+  padding:16px;
+  max-width:760px;
+  margin:auto;
+}
+.card{
+  background:var(--card);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:12px;
+  border:1px solid var(--line);
+}
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.row{
+  display:flex;
+  gap:10px;
+}
+.row > *{flex:1}
+button, .linkbtn{
+  background:#222;
+  color:#fff;
+  border:none;
+  padding:12px 14px;
+  border-radius:12px;
+  font-size:16px;
+  text-decoration:none;
+  display:inline-block;
+  text-align:center;
+  min-height:44px;
+}
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  margin-bottom:12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#222;
+  color:#fff;
+  font-size:16px;
+}
+label{
+  font-size:14px;
+  color:#d7d7d7;
+}
+.badge{
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  color:#111;
+  font-weight:700;
+  text-transform:capitalize;
+}
+.green{background:var(--green)}
+.gold{background:var(--gold)}
+.red{background:var(--red)}
+.gray{background:#777;color:#fff}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.story{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:28px;
+}
+.story h1{
+  font-size:38px;
+  line-height:1.1;
+  margin:0 0 16px;
+}
+.story h2{
+  font-size:24px;
+  color:var(--muted);
+  margin:0 0 8px;
+}
+.story .big{
+  font-size:20px;
+  margin:8px 0;
+}
+.kv{
+  display:grid;
+  grid-template-columns:110px 1fr;
+  gap:8px;
+  margin:6px 0;
+  font-size:14px;
+}
+hr{
+  border:none;
+  border-top:1px solid var(--line);
+  margin:14px 0;
+}
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:36px 20px;
+}
+.search{
+  margin-bottom:14px;
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const STORAGE_KEYS = {
+  gigs: "aleph_gigs",
+  contacts: "aleph_contacts",
+  setup: "aleph_setup"
+};
+
+const VENUES = [
+  {name:"Ronnie Scott's Jazz Club", city:"London", address:"47 Frith St, London W1D 4HT", capacity:220, website:"https://www.ronniescotts.co.uk", tickets:"https://www.ronniescotts.co.uk", type:"jazz_club"},
+  {name:"606 Club", city:"London", address:"90 Lots Rd, London SW10 0QD", capacity:120, website:"https://www.606club.co.uk", tickets:"https://www.606club.co.uk", type:"jazz_club"},
+  {name:"Vortex Jazz Club", city:"London", address:"11 Gillett Square, London N16", capacity:100, website:"https://www.vortexjazz.co.uk", tickets:"https://www.vortexjazz.co.uk", type:"jazz_club"},
+  {name:"PizzaExpress Live Soho", city:"London", address:"10 Dean St, London W1D", capacity:120, website:"https://www.pizzaexpresslive.com", tickets:"https://www.pizzaexpresslive.com", type:"jazz_club"},
+  {name:"PizzaExpress Live Chelsea", city:"London", address:"151 King's Rd, London", capacity:100, website:"https://www.pizzaexpresslive.com", tickets:"https://www.pizzaexpresslive.com", type:"jazz_club"},
+  {name:"Jazz Cafe", city:"London", address:"5 Parkway, Camden", capacity:420, website:"https://thejazzcafelondon.com", tickets:"https://thejazzcafelondon.com", type:"jazz_club"},
+  {name:"Kansas Smittys", city:"London", address:"Broadway Market, London", capacity:90, website:"https://kansassmittys.com", tickets:"https://kansassmittys.com", type:"jazz_club"},
+  {name:"The Verdict", city:"Brighton", address:"159 Edward St, Brighton", capacity:70, website:"https://www.verdictjazz.com", tickets:"https://www.verdictjazz.com", type:"jazz_club"},
+  {name:"Peggy's Skylight", city:"Nottingham", address:"3 George St, Nottingham", capacity:100, website:"https://www.peggysskylight.co.uk", tickets:"https://www.peggysskylight.co.uk", type:"jazz_club"},
+  {name:"Matt & Phreds", city:"Manchester", address:"64 Tib St, Manchester", capacity:80, website:"https://mattandphreds.com", tickets:"https://mattandphreds.com", type:"jazz_club"},
+  {name:"Band on the Wall", city:"Manchester", address:"25 Swan St, Manchester", capacity:340, website:"https://bandonthewall.org", tickets:"https://bandonthewall.org", type:"jazz_friendly"},
+  {name:"The Lescar", city:"Sheffield", address:"303 Sharrow Vale Rd", capacity:120, website:"https://lescar.co.uk", tickets:"https://lescar.co.uk", type:"jazz_friendly"},
+  {name:"The Bear Club", city:"Luton", address:"24a Guildford St", capacity:100, website:"https://www.thebearclub.co.uk", tickets:"https://www.thebearclub.co.uk", type:"jazz_club"},
+  {name:"Hideaway Jazz Club", city:"London", address:"2 Empire Mews Streatham", capacity:150, website:"https://hideawaylive.co.uk", tickets:"https://hideawaylive.co.uk", type:"jazz_club"},
+  {name:"Seven Arts", city:"Leeds", address:"31 Harrogate Rd", capacity:120, website:"https://sevenleeds.co.uk", tickets:"https://sevenleeds.co.uk", type:"arts_centre"},
+  {name:"Eastside Jazz Club", city:"Birmingham", address:"90-92 Allison St", capacity:120, website:"https://www.eastsidejazzclub.co.uk", tickets:"https://www.eastsidejazzclub.co.uk", type:"jazz_club"},
+  {name:"St George's Bristol", city:"Bristol", address:"Great George St", capacity:500, website:"https://www.stgeorgesbristol.co.uk", tickets:"https://www.stgeorgesbristol.co.uk", type:"arts_centre"},
+  {name:"The Concorde Club", city:"Southampton", address:"Stoneham Ln", capacity:350, website:"https://www.theconcordeclub.com", tickets:"https://www.theconcordeclub.com", type:"jazz_club"},
+  {name:"Jazz Bar Edinburgh", city:"Edinburgh", address:"1a Chambers St", capacity:100, website:"https://www.thejazzbar.co.uk", tickets:"https://www.thejazzbar.co.uk", type:"jazz_club"},
+  {name:"The Blue Lamp", city:"Aberdeen", address:"121 Gallowgate", capacity:120, website:"https://thebluelampaberdeen.com", tickets:"https://thebluelampaberdeen.com", type:"jazz_club"},
+  {name:"Cluny Jazz", city:"Newcastle", address:"36 Lime St", capacity:300, website:"https://thecluny.com", tickets:"https://thecluny.com", type:"jazz_friendly"},
+  {name:"The Met", city:"Bury", address:"Market St", capacity:300, website:"https://themet.org.uk", tickets:"https://themet.org.uk", type:"arts_centre"},
+  {name:"Black Mountain Jazz", city:"Brecon", address:"Various venues", capacity:200, website:"https://breconjazz.org", tickets:"https://breconjazz.org", type:"festival"},
+  {name:"Love Supreme Festival", city:"Glynde", address:"Glynde Place", capacity:20000, website:"https://lovesupremefestival.com", tickets:"https://lovesupremefestival.com", type:"festival"},
+  {name:"EFG London Jazz Festival", city:"London", address:"Various venues", capacity:2000, website:"https://efglondonjazzfestival.org.uk", tickets:"https://efglondonjazzfestival.org.uk", type:"festival"}
+];
+
+let state = {
+  screen: "list",
+  gigs: load(STORAGE_KEYS.gigs, []),
+  selectedGig: null,
+  venueSearch: ""
+};
+
+function save(key, value){
+  localStorage.setItem(key, JSON.stringify(value));
+}
+function load(key, fallback){
+  try{
+    return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+  }catch(e){
+    return fallback;
+  }
+}
+function persist(){
+  save(STORAGE_KEYS.gigs, state.gigs);
+}
+function normalize(s){
+  return (s || "").toLowerCase().replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
+}
+function findVenue(query){
+  const q = normalize(query);
+  if(!q) return null;
+  return VENUES.find(v => {
+    const name = normalize(v.name);
+    const city = normalize(v.city);
+    return name.includes(q) || q.includes(name) || (q.includes("verdict") && name.includes("verdict")) || (q.includes("ronnie") && name.includes("ronnie")) || (q.includes("606") && name.includes("606")) || (q.includes("vortex") && name.includes("vortex")) || (q.includes("pizza") && name.includes("pizzaexpress")) || (q.includes("peggy") && name.includes("peggy")) || q.includes(city + " " + name);
+  }) || null;
+}
+function daysTo(date){
+  return Math.ceil((new Date(date) - new Date()) / 86400000);
+}
+function health(g){
+  if(g.state !== "Ticketed") return "gray";
+  const ratio = (Number(g.sold) || 0) / (Number(g.target) || 1);
+  const d = daysTo(g.date);
+  if(d <= 7 && ratio < 0.5) return "red";
+  if(d <= 14 && ratio < 0.35) return "red";
+  if(ratio >= 0.8) return "green";
+  return "gold";
+}
+function healthLabel(g){
+  const h = health(g);
+  if(h === "red") return "urgent";
+  if(h === "green") return "healthy";
+  if(h === "gold") return "watch";
+  return "n/a";
+}
+function addGig(){
+  state.gigs.unshift({
+    title:"New Gig",
+    date:new Date().toISOString().slice(0,10),
+    venue:"",
+    city:"",
+    address:"",
+    website:"",
+    tickets:"",
+    capacity:0,
+    type:"",
+    state:"TBC",
+    sold:0,
+    target:0,
+    notes:""
+  });
+  persist();
+  openGig(0);
+}
+function deleteGig(i){
+  state.gigs.splice(i,1);
+  state.selectedGig = null;
+  persist();
+  renderList();
+}
+function updateGigField(i, key, value){
+  state.gigs[i][key] = value;
+  if(key === "venue"){
+    const match = findVenue(value);
+    if(match){
+      state.gigs[i].venue = match.name;
+      state.gigs[i].city = match.city || "";
+      state.gigs[i].address = match.address || "";
+      state.gigs[i].website = match.website || "";
+      state.gigs[i].tickets = match.tickets || "";
+      state.gigs[i].capacity = match.capacity || 0;
+      state.gigs[i].type = match.type || "";
+      if(!state.gigs[i].target || Number(state.gigs[i].target) === 0){
+        state.gigs[i].target = match.capacity || 0;
+      }
+    }
+  }
+  persist();
+}
+function openGig(i){
+  state.selectedGig = i;
+  state.screen = "detail";
+  renderDetail();
+}
+function showStory(i){
+  const g = state.gigs[i];
+  document.getElementById("app").innerHTML = `
+    <div class="story">
+      <h1>${escapeHtml(g.title || "")}</h1>
+      <h2>${escapeHtml(g.venue || "")}</h2>
+      <div class="big">${escapeHtml(g.city || "")}</div>
+      <div class="big">${escapeHtml(g.date || "")}</div>
+      <div class="big">${escapeHtml(g.state || "")}</div>
+      <div class="big">${g.capacity ? "Capacity: " + escapeHtml(String(g.capacity)) : ""}</div>
+      <div style="margin-top:20px">
+        <button onclick="renderDetail()">Close</button>
+      </div>
+    </div>
+  `;
+}
+function showVenues(){
+  state.screen = "venues";
+  renderVenues();
+}
+function renderList(){
+  state.screen = "list";
+  const gigs = state.gigs;
+  document.getElementById("app").innerHTML = `
+    <div class="screen">
+      <div class="top">
+        <h2 style="margin:0">Aleph Gigs</h2>
+        <div class="row" style="flex:0 0 auto">
+          <button onclick="showVenues()">Venues</button>
+          <button onclick="addGig()">+</button>
+        </div>
+      </div>
+
+      ${gigs.length ? gigs.map((g,i)=>`
+        <div class="card" onclick="openGig(${i})">
+          <div class="top">
+            <strong>${escapeHtml(g.title || "")}</strong>
+            <span class="badge ${health(g)}">${healthLabel(g)}</span>
+          </div>
+          <div>${escapeHtml(g.date || "")}</div>
+          <div>${escapeHtml(g.venue || "")}</div>
+          <div class="muted">${escapeHtml(g.city || "")}</div>
+          ${g.capacity ? `<div class="small muted">Capacity: ${escapeHtml(String(g.capacity))}</div>` : ""}
+        </div>
+      `).join("") : `<div class="empty card">No gigs yet. Tap + to add one.</div>`}
+    </div>
+  `;
+}
+function renderDetail(){
+  const i = state.selectedGig;
+  const g = state.gigs[i];
+  if(g == null){ renderList(); return; }
+
+  document.getElementById("app").innerHTML = `
+    <div class="screen">
+      <div class="top">
+        <button onclick="renderList()">Back</button>
+        <button onclick="showStory(${i})">Story Mode</button>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">${escapeHtml(g.title || "")}</h2>
+
+        <label>Title</label>
+        <input value="${escapeAttr(g.title || "")}" oninput="updateGigField(${i}, 'title', this.value)">
+
+        <label>Date</label>
+        <input type="date" value="${escapeAttr(g.date || "")}" oninput="updateGigField(${i}, 'date', this.value)">
+
+        <label>Venue</label>
+        <input value="${escapeAttr(g.venue || "")}" oninput="updateGigField(${i}, 'venue', this.value)">
+        <div class="small muted">Typing a known venue auto-fills details.</div>
+
+        <label>City</label>
+        <input value="${escapeAttr(g.city || "")}" oninput="updateGigField(${i}, 'city', this.value)">
+
+        <label>Address</label>
+        <textarea oninput="updateGigField(${i}, 'address', this.value)">${escapeHtml(g.address || "")}</textarea>
+
+        <div class="row">
+          <div>
+            <label>Status</label>
+            <select oninput="updateGigField(${i}, 'state', this.value)">
+              <option ${g.state==="Ticketed"?"selected":""}>Ticketed</option>
+              <option ${g.state==="Free"?"selected":""}>Free</option>
+              <option ${g.state==="TBC"?"selected":""}>TBC</option>
+            </select>
+          </div>
+          <div>
+            <label>Type</label>
+            <select oninput="updateGigField(${i}, 'type', this.value)">
+              <option value="" ${!g.type?"selected":""}>-</option>
+              <option value="jazz_club" ${g.type==="jazz_club"?"selected":""}>jazz_club</option>
+              <option value="jazz_friendly" ${g.type==="jazz_friendly"?"selected":""}>jazz_friendly</option>
+              <option value="arts_centre" ${g.type==="arts_centre"?"selected":""}>arts_centre</option>
+              <option value="festival" ${g.type==="festival"?"selected":""}>festival</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Tickets sold</label>
+            <input type="number" value="${escapeAttr(String(g.sold || 0))}" oninput="updateGigField(${i}, 'sold', Number(this.value))">
+          </div>
+          <div>
+            <label>Target / Capacity</label>
+            <input type="number" value="${escapeAttr(String(g.target || 0))}" oninput="updateGigField(${i}, 'target', Number(this.value))">
+          </div>
+        </div>
+
+        <label>Capacity</label>
+        <input type="number" value="${escapeAttr(String(g.capacity || 0))}" oninput="updateGigField(${i}, 'capacity', Number(this.value))">
+
+        <label>Website</label>
+        <input value="${escapeAttr(g.website || "")}" oninput="updateGigField(${i}, 'website', this.value)">
+
+        <label>Ticket link</label>
+        <input value="${escapeAttr(g.tickets || "")}" oninput="updateGigField(${i}, 'tickets', this.value)">
+
+        <label>Notes</label>
+        <textarea oninput="updateGigField(${i}, 'notes', this.value)">${escapeHtml(g.notes || "")}</textarea>
+
+        <hr>
+
+        <div class="kv"><div>Health</div><div><span class="badge ${health(g)}">${healthLabel(g)}</span></div></div>
+        <div class="kv"><div>Venue</div><div>${escapeHtml(g.venue || "-")}</div></div>
+        <div class="kv"><div>City</div><div>${escapeHtml(g.city || "-")}</div></div>
+        <div class="kv"><div>Address</div><div>${escapeHtml(g.address || "-")}</div></div>
+        <div class="kv"><div>Capacity</div><div>${escapeHtml(String(g.capacity || "-"))}</div></div>
+        <div class="kv"><div>Type</div><div>${escapeHtml(g.type || "-")}</div></div>
+
+        <div class="row" style="margin-top:14px">
+          ${g.tickets ? `<a class="linkbtn" href="${escapeAttr(g.tickets)}" target="_blank" rel="noopener noreferrer">Tickets</a>` : `<button disabled style="opacity:.45">Tickets</button>`}
+          ${g.website ? `<a class="linkbtn" href="${escapeAttr(g.website)}" target="_blank" rel="noopener noreferrer">Website</a>` : `<button disabled style="opacity:.45">Website</button>`}
+        </div>
+
+        <div style="margin-top:14px">
+          <button onclick="deleteGig(${i})" style="width:100%">Delete gig</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function renderVenues(){
+  const q = state.venueSearch || "";
+  const filtered = VENUES.filter(v => {
+    const blob = normalize([v.name, v.city, v.address, v.type].join(" "));
+    return !q || blob.includes(normalize(q));
+  });
+
+  document.getElementById("app").innerHTML = `
+    <div class="screen">
+      <div class="top">
+        <button onclick="renderList()">Back</button>
+        <h2 style="margin:0">Venue Database</h2>
+        <div style="width:60px"></div>
+      </div>
+
+      <input class="search" placeholder="Search venue or city" value="${escapeAttr(q)}" oninput="state.venueSearch=this.value; renderVenues()">
+
+      ${filtered.map((v, idx)=>`
+        <div class="card">
+          <div class="top">
+            <strong>${escapeHtml(v.name)}</strong>
+            <span class="badge gray">${escapeHtml(v.type)}</span>
+          </div>
+          <div>${escapeHtml(v.city)}</div>
+          <div class="small muted">${escapeHtml(v.address)}</div>
+          <div class="small muted">Capacity: ${escapeHtml(String(v.capacity || "-"))}</div>
+          <div class="row" style="margin-top:12px">
+            <a class="linkbtn" href="${escapeAttr(v.tickets)}" target="_blank" rel="noopener noreferrer">Tickets</a>
+            <a class="linkbtn" href="${escapeAttr(v.website)}" target="_blank" rel="noopener noreferrer">Website</a>
+            <button onclick="quickAddVenue(${idx})">Use</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+function quickAddVenue(idx){
+  const v = VENUES[idx];
+  state.gigs.unshift({
+    title:"New Gig",
+    date:new Date().toISOString().slice(0,10),
+    venue:v.name,
+    city:v.city || "",
+    address:v.address || "",
+    website:v.website || "",
+    tickets:v.tickets || "",
+    capacity:v.capacity || 0,
+    target:v.capacity || 0,
+    type:v.type || "",
+    state:"TBC",
+    sold:0,
+    notes:""
+  });
+  persist();
+  openGig(0);
+}
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+function escapeAttr(str){
+  return escapeHtml(str);
+}
+
+renderList();
+</script>
+</body>
+</html>
