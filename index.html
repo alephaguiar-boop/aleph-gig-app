@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Aleph Gigs</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <style>
+    :root{
+      --bg:#06101f;
+      --bg2:#0b1730;
+      --card:#101d36;
+      --card2:#0c1730;
+      --line:#2a3958;
+      --text:#f8fafc;
+      --muted:#a8b2c9;
+      --accent:#4f7cff;
+      --blue:#4168ff;
+      --green:#4c9d57;
+      --red:#9d3535;
+      --gold:#c2a36b;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,body{
+      margin:0;
+      background:
+        radial-gradient(circle at top, rgba(90,120,255,.12), transparent 30%),
+        linear-gradient(180deg,var(--bg2),var(--bg));
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+      min-height:100%;
+    }
+
+    body{
+      padding-bottom:110px;
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      padding:50px 18px 14px;
+      background:linear-gradient(180deg, rgba(6,16,31,.98), rgba(6,16,31,.88));
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+
+    .header-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .brand{
+      font-size:15px;
+      font-weight:700;
+      letter-spacing:.2px;
+      text-align:center;
+      flex:1;
+    }
+
+    .header-actions{
+      display:flex;
+      gap:8px;
+    }
+
+    .header-btn{
+      border:none;
+      border-radius:10px;
+      padding:10px 12px;
+      font-size:12px;
+      font-weight:800;
+      color:#fff;
+      background:rgba(255,255,255,.08);
+    }
+
+    .header-btn.primary{
+      background:var(--accent);
+    }
+
+    main{
+      padding:14px;
+    }
+
+    .tab{
+      display:none;
+      animation:fadeIn .18s ease;
+    }
+
+    .tab.active{
+      display:block;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .compact-hero{
+      padding:14px 14px 12px;
+    }
+
+    .hero-title{
+      font-size:18px;
+      font-weight:700;
+      line-height:1.15;
+      text-align:center;
+      margin:0;
+    }
+
+    .hero-meta{
+      margin-top:6px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .hero-date{
+      margin-top:8px;
+      text-align:center;
+      font-size:15px;
+      font-weight:700;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+    }
+
+    .row > *{
+      flex:1;
+    }
+
+    .action-btn, .pill-btn, .outline-btn, .link-btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      min-height:48px;
+      border:none;
+      border-radius:14px;
+      font-size:14px;
+      font-weight:800;
+      text-decoration:none;
+      cursor:pointer;
+    }
+
+    .outline-btn{
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .action-btn{
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    .action-btn.primary{
+      background:var(--accent);
+      border-color:transparent;
+    }
+
+    .pill-row{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill-btn{
+      min-height:44px;
+      padding:0 16px;
+      width:auto;
+      flex:1;
+      min-width:120px;
+      border-radius:999px;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+    }
+
+    .pill-btn.blue{ background:linear-gradient(180deg,#4f7cff,#3256d8); }
+    .pill-btn.green{ background:linear-gradient(180deg,#5aa164,#3f7f49); }
+    .pill-btn.red{ background:linear-gradient(180deg,#ae4444,#8b2f2f); }
+    .pill-btn.gray{ background:linear-gradient(180deg,#44516b,#2f3950); }
+
+    .caption-card{
+      padding:16px;
+    }
+
+    .caption-text{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:16px;
+      padding:18px 16px;
+      font-size:16px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      color:#f5f7fb;
+      min-height:260px;
+    }
+
+    .caption-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .section-title{
+      font-size:14px;
+      font-weight:800;
+      color:#d7deed;
+      margin:0 0 10px;
+      letter-spacing:.2px;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .list-item{
+      font-size:14px;
+      color:#eef3ff;
+      line-height:1.35;
+    }
+
+    .list-item.muted{
+      color:var(--muted);
+    }
+
+    .next-up-card{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+    }
+
+    .next-up-label{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:800;
+    }
+
+    .next-up-title{
+      font-size:15px;
+      font-weight:700;
+      line-height:1.2;
+    }
+
+    .next-up-meta{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      border:1px solid rgba(255,255,255,.1);
+    }
+
+    .chip.free{ background:rgba(79,124,255,.18); color:#dbe5ff; }
+    .chip.ticketed{ background:rgba(194,163,107,.18); color:#f0deb7; }
+    .chip.tbc{ background:rgba(255,255,255,.08); color:#d7deed; }
+
+    .gig-card{
+      cursor:pointer;
+    }
+
+    .gig-title{
+      font-size:16px;
+      font-weight:700;
+      margin:0;
+    }
+
+    .gig-meta{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .gig-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      font-weight:800;
+      color:#d7deed;
+      margin:12px 0 6px;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+    }
+
+    input, textarea, select{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:14px;
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-size:16px;
+      border:1px solid rgba(255,255,255,.08);
+      outline:none;
+    }
+
+    textarea{
+      resize:vertical;
+      min-height:88px;
+    }
+
+    .venues-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .venue-name{
+      font-size:16px;
+      font-weight:700;
+    }
+
+    .venue-sub{
+      margin-top:4px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:28px 16px;
+      font-size:14px;
+    }
+
+    nav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:60;
+      display:flex;
+      background:rgba(11,23,48,.96);
+      backdrop-filter: blur(12px);
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .nav-btn{
+      flex:1;
+      border:none;
+      background:none;
+      color:var(--muted);
+      padding:14px 6px 10px;
+      font-size:11px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      cursor:pointer;
+    }
+
+    .nav-btn.active{
+      color:var(--accent);
+    }
+
+    .story-overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:999;
+      background:#000;
+      padding:70px 28px;
+      text-align:center;
+      overflow:auto;
+    }
+
+    .story-kicker{
+      color:var(--accent);
+      letter-spacing:8px;
+      font-size:13px;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    .story-title{
+      margin-top:26px;
+      font-size:44px;
+      line-height:.98;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+
+    .story-sub{
+      margin-top:22px;
+      font-size:24px;
+      color:#d6def5;
+      letter-spacing:2px;
+    }
+
+    .story-date{
+      margin-top:18px;
+      font-size:20px;
+      font-weight:700;
+    }
+
+    .story-cta{
+      margin-top:28px;
+      font-size:15px;
+      letter-spacing:3px;
+      text-transform:uppercase;
+      color:#dbe5ff;
+      font-weight:800;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(3px);}
+      to{opacity:1; transform:translateY(0);}
+    }
+
+    @media (max-width: 700px){
+      .split{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="storyOverlay" class="story-overlay" onclick="hideStory()">
+    <div class="story-kicker">LIVE MUSIC</div>
+    <div id="storyTitle" class="story-title"></div>
+    <div id="storySub" class="story-sub"></div>
+    <div id="storyDate" class="story-date"></div>
+    <div id="storyCta" class="story-cta"></div>
+  </div>
+
+  <header>
+    <div class="header-row">
+      <button class="header-btn" onclick="openDetail(currentGigId())">Edit</button>
+      <div class="brand">Aleph Gigs</div>
+      <div class="header-actions">
+        <button class="header-btn" onclick="addGig()">+ Add</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="tab-promo" class="tab active"></section>
+    <section id="tab-gigs" class="tab"></section>
+    <section id="tab-venues" class="tab"></section>
+    <section id="tab-setup" class="tab"></section>
+    <section id="tab-detail" class="tab"></section>
+  </main>
+
+  <nav>
+    <button id="nav-promo" class="nav-btn active" onclick="showTab('promo')">Promo</button>
+    <button id="nav-gigs" class="nav-btn" onclick="showTab('gigs')">Gigs</button>
+    <button id="nav-venues" class="nav-btn" onclick="showTab('venues')">Venues</button>
+    <button id="nav-setup" class="nav-btn" onclick="showTab('setup')">Setup</button>
+  </nav>
+
+  <script>
+    const STORAGE_KEYS = {
+      gigs: 'aleph_gigs',
+      setup: 'aleph_setup',
+      current: 'aleph_current_promo_gig'
+    };
+
+    const VENUES = [
+      { name:"Ronnie Scott's Jazz Club", aliases:["ronnie","ronnie scott","ronnie scotts"], city:"London", address:"47 Frith St, London W1D 4HT", capacity:220, website:"https://www.ronniescotts.co.uk", tickets:"https://www.ronniescotts.co.uk", type:"ticketed" },
+      { name:"606 Club", aliases:["606","606 club"], city:"London", address:"90 Lots Rd, London SW10 0QD", capacity:120, website:"https://www.606club.co.uk", tickets:"https://www.606club.co.uk/events/", type:"ticketed" },
+      { name:"Vortex Jazz Club", aliases:["vortex","vortex jazz"], city:"London", address:"11 Gillett Square, London N16 8AZ", capacity:100, website:"https://www.vortexjazz.co.uk", tickets:"https://www.vortexjazz.co.uk/events/", type:"ticketed" },
+      { name:"PizzaExpress Live Soho", aliases:["pizzaexpress","pizza express","pizzaexpress soho","pizza express soho"], city:"London", address:"10 Dean St, London W1D 3RW", capacity:120, website:"https://www.pizzaexpresslive.com", tickets:"https://www.pizzaexpresslive.com/whats-on", type:"ticketed" },
+      { name:"PizzaExpress Live Chelsea", aliases:["pizzaexpress chelsea","pizza express chelsea"], city:"London", address:"152 King's Rd, London SW3 4UT", capacity:100, website:"https://www.pizzaexpresslive.com", tickets:"https://www.pizzaexpresslive.com/whats-on", type:"ticketed" },
+      { name:"The Verdict", aliases:["verdict","the verdict"], city:"Brighton", address:"159 Edward St, Brighton BN2 0JB", capacity:70, website:"https://www.verdictjazz.com", tickets:"https://www.verdictjazz.com/tickets", type:"free" },
+      { name:"Peggy's Skylight", aliases:["peggy","peggys","peggy's"], city:"Nottingham", address:"3 George St, Nottingham NG1 3BH", capacity:100, website:"https://www.peggysskylight.co.uk", tickets:"https://www.peggysskylight.co.uk/events", type:"ticketed" },
+      { name:"Matt & Phreds", aliases:["matt and phreds","matt & phreds"], city:"Manchester", address:"64 Tib St, Manchester M4 1LW", capacity:80, website:"https://mattandphreds.com", tickets:"https://mattandphreds.com", type:"free" },
+      { name:"Band on the Wall", aliases:["band on the wall"], city:"Manchester", address:"25 Swan St, Manchester M4 5JZ", capacity:340, website:"https://bandonthewall.org", tickets:"https://bandonthewall.org", type:"ticketed" },
+      { name:"The Bear Club", aliases:["bear club","the bear club"], city:"Luton", address:"24A Guildford St, Luton LU1 2NR", capacity:100, website:"https://www.thebearclub.co.uk", tickets:"https://www.thebearclub.co.uk", type:"ticketed" },
+      { name:"St George's Bristol", aliases:["st george","st george's bristol"], city:"Bristol", address:"Great George St, Bristol BS1 5RR", capacity:500, website:"https://www.stgeorgesbristol.co.uk", tickets:"https://www.stgeorgesbristol.co.uk", type:"ticketed" },
+      { name:"Jazz Bar Edinburgh", aliases:["jazz bar edinburgh","the jazz bar"], city:"Edinburgh", address:"1A Chambers St, Edinburgh EH1 1HR", capacity:100, website:"https://www.thejazzbar.co.uk", tickets:"https://www.thejazzbar.co.uk", type:"ticketed" }
+    ];
+
+    const DEFAULT_SETUP = {
+      ical: '',
+      lineup: '',
+      promoTone: 'Warm, direct, stylish, personal.',
+      icsPaste: ''
+    };
+
+    let gigs = load(STORAGE_KEYS.gigs, []);
+    let setup = load(STORAGE_KEYS.setup, DEFAULT_SETUP);
+    let activeTab = 'promo';
+
+    function load(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch(e){
+        return fallback;
+      }
+    }
+
+    function save(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function normalize(str=''){
+      return str.toLowerCase().replace(/[^\w\s]/g,' ').replace(/\s+/g,' ').trim();
+    }
+
+    function findVenue(text=''){
+      const q = normalize(text);
+      if(!q) return null;
+      return VENUES.find(v => {
+        const name = normalize(v.name);
+        if(name.includes(q) || q.includes(name)) return true;
+        return (v.aliases || []).some(a => {
+          const alias = normalize(a);
+          return q.includes(alias) || alias.includes(q);
+        });
+      }) || null;
+    }
+
+    function enrichGig(g){
+      const match = findVenue((g.venue || '') + ' ' + (g.title || ''));
+      if(!match) return g;
+      return {
+        ...g,
+        venue: g.venue || match.name,
+        city: g.city || match.city,
+        address: g.address || match.address,
+        website: g.website || match.website,
+        ticketUrl: g.ticketUrl || match.tickets,
+        cap: g.cap || match.capacity,
+        type: g.type || match.type || 'free'
+      };
+    }
+
+    function todayString(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatFriendly(dateStr){
+      if(!dateStr) return '';
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString(undefined,{ weekday:'short', day:'numeric', month:'short' });
+    }
+
+    function formatLong(dateStr){
+      if(!dateStr) return '';
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString(undefined,{ weekday:'long', day:'numeric', month:'long' });
+    }
+
+    function upcomingGigs(){
+      gigs = gigs.map(enrichGig);
+      save(STORAGE_KEYS.gigs, gigs);
+      const today = todayString();
+      return gigs
+        .filter(g => (g.date || '') >= today)
+        .sort((a,b) => new Date(a.date) - new Date(b.date));
+    }
+
+    function currentGigId(){
+      const stored = localStorage.getItem(STORAGE_KEYS.current);
+      const list = upcomingGigs();
+      const exists = list.find(g => String(g.id) === String(stored));
+      if(exists) return exists.id;
+      if(list[0]){
+        localStorage.setItem(STORAGE_KEYS.current, String(list[0].id));
+        return list[0].id;
+      }
+      return '';
+    }
+
+    function currentGig(){
+      return gigs.find(g => String(g.id) === String(currentGigId())) || null;
+    }
+
+    function setCurrentGig(id){
+      localStorage.setItem(STORAGE_KEYS.current, String(id));
+      renderAll();
+      showTab('promo');
+    }
+
+    function statusLabel(type){
+      if(type === 'ticketed') return 'TICKETS';
+      if(type === 'tbc') return 'TBC';
+      return 'FREE ENTRY';
+    }
+
+    function storyLabel(type){
+      if(type === 'ticketed') return 'TICKETS AVAILABLE NOW';
+      if(type === 'tbc') return 'MORE INFO SOON';
+      return 'FREE ENTRY';
+    }
+
+    function generateCaption(g, mode='default'){
+      if(!g) return '';
+      const title = g.title || 'Aleph Aguiar';
+      const venue = g.venue || 'Venue TBC';
+      const city = g.city ? `, ${g.city}` : '';
+      const date = formatLong(g.date);
+      const lineup = setup.lineup ? `\n\nLineup:\n${setup.lineup}` : '';
+      const ticketLine = g.type === 'ticketed' && g.ticketUrl ? `\n\nTickets: ${g.ticketUrl}` : '';
+      const introFree = `Free entry.`;
+      const introTicket = `Tickets available now.`;
+      const introTbc = `More info soon.`;
+      const intro = g.type === 'ticketed' ? introTicket : g.type === 'tbc' ? introTbc : introFree;
+      const body = g.type === 'ticketed'
+        ? `Looking forward to this one — would love to see you there.`
+        : g.type === 'tbc'
+        ? `Details coming soon, but save the date.`
+        : `Looking forward to this one — come through if you're around.`;
+
+      const full = `${title} at ${venue}${city}.\n\n${date}.\n${intro}\n\n${body}${lineup}${ticketLine}`;
+      if(mode === 'shorter'){
+        return `${title}\n${venue}${city}\n${date}\n${intro}`;
+      }
+      if(mode === 'alt'){
+        return `${title}\n${venue}${city}\n${date}\n\n${intro}\n${g.type === 'free' ? 'Come through for some live music.' : g.type === 'ticketed' ? 'Grab a ticket if you’d like to come.' : 'More details soon.'}${ticketLine}`;
+      }
+      return full;
+    }
+
+    function generatePromoPlan(g){
+      if(!g) return [];
+      if(g.type === 'ticketed'){
+        return [
+          'Post rehearsal',
+          'Story reminder',
+          'Send invites',
+          'Ticket push'
+        ];
+      }
+      if(g.type === 'tbc'){
+        return [
+          'Tease the date',
+          'Story reminder',
+          'Confirm details',
+          'Send invites'
+        ];
+      }
+      return [
+        'Post rehearsal',
+        'Story reminder',
+        'Send invites'
+      ];
+    }
+
+    function generateIdeas(g){
+      if(!g) return [];
+      if(g.type === 'ticketed'){
+        return ['Morning practice','Talking invite','Rehearsal clip'];
+      }
+      if(g.type === 'tbc'){
+        return ['Teaser clip','Venue mention','Save the date'];
+      }
+      return ['Morning practice','Talking invite','Rehearsal clip'];
+    }
+
+    function copyText(text, msg='Copied!'){
+      navigator.clipboard.writeText(text).then(() => alert(msg)).catch(() => alert(text));
+    }
+
+    function addGig(){
+      const id = Date.now();
+      gigs.unshift(enrichGig({
+        id,
+        title:'New Gig',
+        venue:'',
+        city:'',
+        address:'',
+        website:'',
+        ticketUrl:'',
+        date:todayString(),
+        sold:0,
+        cap:0,
+        type:'free',
+        notes:''
+      }));
+      save(STORAGE_KEYS.gigs, gigs);
+      localStorage.setItem(STORAGE_KEYS.current, String(id));
+      renderAll();
+      openDetail(id);
+    }
+
+    function updateGig(id, patch){
+      const index = gigs.findIndex(g => String(g.id) === String(id));
+      if(index < 0) return;
+      gigs[index] = enrichGig({ ...gigs[index], ...patch });
+      save(STORAGE_KEYS.gigs, gigs);
+      renderAll();
+    }
+
+    function deleteGig(id){
+      if(!confirm('Delete this gig?')) return;
+      gigs = gigs.filter(g => String(g.id) !== String(id));
+      save(STORAGE_KEYS.gigs, gigs);
+      renderAll();
+      showTab('gigs');
+    }
+
+    function openDetail(id){
+      const g = gigs.find(x => String(x.id) === String(id));
+      if(!g) return;
+      localStorage.setItem(STORAGE_KEYS.current, String(id));
+      const detail = document.getElementById('tab-detail');
+      detail.innerHTML = `
+        <div class="card">
+          <div class="section-title">Edit Gig</div>
+
+          <label>Title</label>
+          <input value="${escapeHtml(g.title || '')}" oninput="updateGig(${id},{title:this.value})">
+
+          <label>Date</label>
+          <input type="date" value="${escapeHtml(g.date || '')}" oninput="updateGig(${id},{date:this.value})">
+
+          <label>Venue</label>
+          <input value="${escapeHtml(g.venue || '')}" oninput="updateGig(${id},{venue:this.value})">
+
+          <label>City</label>
+          <input value="${escapeHtml(g.city || '')}" oninput="updateGig(${id},{city:this.value})">
+
+          <label>Status</label>
+          <select oninput="updateGig(${id},{type:this.value})">
+            <option value="free" ${g.type==='free'?'selected':''}>Free</option>
+            <option value="ticketed" ${g.type==='ticketed'?'selected':''}>Ticketed</option>
+            <option value="tbc" ${g.type==='tbc'?'selected':''}>TBC</option>
+          </select>
+
+          <label>Ticket Link</label>
+          <input value="${escapeHtml(g.ticketUrl || '')}" oninput="updateGig(${id},{ticketUrl:this.value})">
+
+          <label>Website</label>
+          <input value="${escapeHtml(g.website || '')}" oninput="updateGig(${id},{website:this.value})">
+
+          <label>Address</label>
+          <textarea oninput="updateGig(${id},{address:this.value})">${escapeHtml(g.address || '')}</textarea>
+
+          <label>Notes</label>
+          <textarea oninput="updateGig(${id},{notes:this.value})">${escapeHtml(g.notes || '')}</textarea>
+
+          <div class="row" style="margin-top:12px">
+            <button class="outline-btn" onclick="showTab('promo')">Done</button>
+            <button class="outline-btn" onclick="deleteGig(${id})">Delete</button>
+          </div>
+        </div>
+      `;
+      showTab('detail');
+    }
+
+    function showStory(){
+      const g = currentGig();
+      if(!g) return;
+      document.getElementById('storyTitle').textContent = g.title || '';
+      document.getElementById('storySub').textContent = `${g.venue || ''}${g.city ? ' • ' + g.city : ''}`;
+      document.getElementById('storyDate').textContent = formatLong(g.date);
+      document.getElementById('storyCta').textContent = storyLabel(g.type);
+      document.getElementById('storyOverlay').style.display = 'block';
+    }
+
+    function hideStory(){
+      document.getElementById('storyOverlay').style.display = 'none';
+    }
+
+    function showTab(name){
+      activeTab = name;
+      ['promo','gigs','venues','setup','detail'].forEach(tab => {
+        document.getElementById(`tab-${tab}`).classList.toggle('active', tab === name);
+        const nav = document.getElementById(`nav-${tab}`);
+        if(nav) nav.classList.toggle('active', tab === name);
+      });
+    }
+
+    function renderPromo(){
+      const target = document.getElementById('tab-promo');
+      const g = currentGig();
+      const upcoming = upcomingGigs();
+      const nextUp = upcoming.find(x => String(x.id) !== String(g?.id)) || null;
+
+      if(!g){
+        target.innerHTML = `<div class="card empty">No upcoming gigs yet. Tap + Add to create one.</div>`;
+        return;
+      }
+
+      const caption = generateCaption(g);
+      const promoPlan = generatePromoPlan(g);
+      const ideas = generateIdeas(g);
+
+      target.innerHTML = `
+        <div class="card compact-hero">
+          <div class="hero-title">${escapeHtml(g.title)}</div>
+          <div class="hero-meta">${escapeHtml(g.venue || '')}${g.city ? ' • ' + escapeHtml(g.city) : ''}</div>
+          <div class="hero-date">${escapeHtml(formatFriendly(g.date))}</div>
+          <div class="row" style="margin-top:12px">
+            <select class="outline-btn" style="appearance:none;text-align:center" onchange="updateGig(${g.id},{type:this.value})">
+              <option value="free" ${g.type==='free'?'selected':''}>FREE ENTRY</option>
+              <option value="ticketed" ${g.type==='ticketed'?'selected':''}>TICKETED</option>
+              <option value="tbc" ${g.type==='tbc'?'selected':''}>TBC</option>
+            </select>
+            <button class="outline-btn" onclick="openDetail(${g.id})">EDIT</button>
+          </div>
+        </div>
+
+        <div class="card caption-card">
+          <div class="caption-text">${escapeHtml(caption)}</div>
+          <div class="caption-actions">
+            <button class="action-btn" onclick="copyText(generateCaption(currentGig()), 'Caption copied!')">Copy Caption</button>
+            <button class="action-btn" onclick="copyText(generateCaption(currentGig(),'shorter'), 'Shorter caption copied!')">Shorter</button>
+            <button class="action-btn" onclick="copyText(generateCaption(currentGig(),'alt'), 'Alternative caption copied!')">Regenerate</button>
+          </div>
+
+          <div class="pill-row">
+            <button class="pill-btn blue" onclick="copyText('FREE ENTRY')">FREE ENTRY</button>
+            <button class="pill-btn green" onclick="copyText('COME THROUGH')">COME THROUGH</button>
+            <button class="pill-btn red" onclick="copyText('SEE YOU THERE')">SEE YOU THERE</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="split">
+            <div>
+              <div class="section-title">Promo Plan</div>
+              <div class="list">
+                ${promoPlan.map(item => `<div class="list-item">✅ ${escapeHtml(item)}</div>`).join('')}
+              </div>
+            </div>
+            <div>
+              <div class="section-title">Content Ideas</div>
+              <div class="list">
+                ${ideas.map(item => `<div class="list-item">• ${escapeHtml(item)}</div>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${nextUp ? `
+          <div class="card next-up-card" onclick="setCurrentGig(${nextUp.id})">
+            <div>
+              <div class="next-up-label">Next Up</div>
+              <div class="next-up-title">${escapeHtml(nextUp.title)}</div>
+              <div class="next-up-meta">${escapeHtml(nextUp.venue || '')}${nextUp.city ? ' • ' + escapeHtml(nextUp.city) : ''} • ${escapeHtml(formatFriendly(nextUp.date))}</div>
+            </div>
+            <div class="chip ${nextUp.type === 'ticketed' ? 'ticketed' : nextUp.type === 'tbc' ? 'tbc' : 'free'}">${statusLabel(nextUp.type)}</div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function renderGigs(){
+      const target = document.getElementById('tab-gigs');
+      const list = upcomingGigs();
+
+      if(!list.length){
+        target.innerHTML = `<div class="card empty">No upcoming gigs yet.</div>`;
+        return;
+      }
+
+      target.innerHTML = list.map(g => `
+        <div class="card gig-card" onclick="setCurrentGig(${g.id})">
+          <div class="gig-row">
+            <div>
+              <div class="gig-title">${escapeHtml(g.title)}</div>
+              <div class="gig-meta">${escapeHtml(g.venue || '')}${g.city ? ' • ' + escapeHtml(g.city) : ''}</div>
+              <div class="gig-meta">${escapeHtml(formatFriendly(g.date))}</div>
+            </div>
+            <div class="chip ${g.type === 'ticketed' ? 'ticketed' : g.type === 'tbc' ? 'tbc' : 'free'}">${statusLabel(g.type)}</div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button class="outline-btn" onclick="event.stopPropagation(); setCurrentGig(${g.id}); showTab('promo')">Open Promo</button>
+            <button class="outline-btn" onclick="event.stopPropagation(); openDetail(${g.id})">Edit</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderVenues(){
+      const target = document.getElementById('tab-venues');
+      const q = normalize(document.getElementById('venueSearchInput')?.value || '');
+      const filtered = VENUES.filter(v => {
+        const blob = normalize([v.name, v.city, v.address, ...(v.aliases || [])].join(' '));
+        return !q || blob.includes(q);
+      });
+
+      target.innerHTML = `
+        <div class="card">
+          <input id="venueSearchInput" placeholder="Search venue or city" value="${escapeHtml(document.getElementById('venueSearchInput')?.value || '')}" oninput="renderVenues()">
+        </div>
+        <div class="venues-list">
+          ${filtered.map(v => `
+            <div class="card">
+              <div class="venue-name">${escapeHtml(v.name)}</div>
+              <div class="venue-sub">${escapeHtml(v.city)} • ${escapeHtml(v.address)}</div>
+              <div class="row" style="margin-top:12px">
+                <a class="link-btn outline-btn" href="${escapeHtml(v.website)}" target="_blank" rel="noopener noreferrer">Website</a>
+                <button class="outline-btn" onclick="createGigFromVenue('${escapeJs(v.name)}')">Use</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderSetup(){
+      const target = document.getElementById('tab-setup');
+      target.innerHTML = `
+        <div class="card">
+          <div class="section-title">Setup</div>
+
+          <label>Default Lineup</label>
+          <textarea oninput="setup.lineup=this.value; save('${STORAGE_KEYS.setup}', setup)">${escapeHtml(setup.lineup || '')}</textarea>
+
+          <label>Promo Tone</label>
+          <textarea oninput="setup.promoTone=this.value; save('${STORAGE_KEYS.setup}', setup)">${escapeHtml(setup.promoTone || '')}</textarea>
+
+          <label>Paste ICS Text</label>
+          <textarea oninput="setup.icsPaste=this.value; save('${STORAGE_KEYS.setup}', setup)">${escapeHtml(setup.icsPaste || '')}</textarea>
+
+          <button class="action-btn primary" onclick="importPastedICS()">Import Pasted ICS</button>
+        </div>
+      `;
+    }
+
+    function createGigFromVenue(name){
+      const v = VENUES.find(x => x.name === name);
+      if(!v) return;
+      const id = Date.now();
+      gigs.unshift({
+        id,
+        title:'New Gig',
+        venue:v.name,
+        city:v.city,
+        address:v.address,
+        website:v.website,
+        ticketUrl:v.tickets,
+        date:todayString(),
+        sold:0,
+        cap:v.capacity,
+        type:v.type || 'free',
+        notes:''
+      });
+      save(STORAGE_KEYS.gigs, gigs);
+      setCurrentGig(id);
+      openDetail(id);
+    }
+
+    function importPastedICS(){
+      const raw = setup.icsPaste || '';
+      if(!raw.trim()){
+        alert('Paste ICS text first.');
+        return;
+      }
+
+      const events = parseICS(raw);
+      if(!events.length){
+        alert('No events found.');
+        return;
+      }
+
+      events.forEach(ev => {
+        const exists = gigs.find(g => String(g.id) === String(ev.id));
+        if(!exists){
+          gigs.push(enrichGig(ev));
+        }
+      });
+
+      save(STORAGE_KEYS.gigs, gigs);
+      renderAll();
+      alert(`${events.length} event(s) imported.`);
+    }
+
+    function parseICS(raw){
+      const blocks = raw.split('BEGIN:VEVENT').slice(1);
+      const out = [];
+      blocks.forEach(block => {
+        const body = block.split('END:VEVENT')[0] || '';
+        const uid = getICSField(body, 'UID');
+        const title = getICSField(body, 'SUMMARY');
+        const location = getICSField(body, 'LOCATION');
+        const description = getICSField(body, 'DESCRIPTION');
+        const date = getICSDateField(body, 'DTSTART');
+
+        if(!title || !date) return;
+
+        out.push({
+          id: uid ? hash(uid) : Date.now() + Math.floor(Math.random()*10000),
+          title,
+          venue: location || '',
+          city:'',
+          address:'',
+          website:'',
+          ticketUrl:'',
+          date,
+          sold:0,
+          cap:0,
+          type:'free',
+          notes:description || ''
+        });
+      });
+      return out;
+    }
+
+    function getICSField(block, key){
+      const lines = unfoldICS(block);
+      const line = lines.find(l => l.startsWith(key + ':') || l.startsWith(key + ';'));
+      if(!line) return '';
+      return line.slice(line.indexOf(':') + 1).replace(/\\,/g, ',').replace(/\\n/g, '\n').trim();
+    }
+
+    function getICSDateField(block, key){
+      const lines = unfoldICS(block);
+      const line = lines.find(l => l.startsWith(key + ':') || l.startsWith(key + ';'));
+      if(!line) return '';
+      const val = line.slice(line.indexOf(':') + 1).trim();
+      if(/^\d{8}$/.test(val)) return `${val.slice(0,4)}-${val.slice(4,6)}-${val.slice(6,8)}`;
+      if(/^\d{8}T/.test(val)) return `${val.slice(0,4)}-${val.slice(4,6)}-${val.slice(6,8)}`;
+      return '';
+    }
+
+    function unfoldICS(text){
+      return text.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,'').split(/\r?\n/);
+    }
+
+    function hash(str){
+      let h = 0;
+      for(let i=0;i<str.length;i++){
+        h = ((h << 5) - h) + str.charCodeAt(i);
+        h |= 0;
+      }
+      return Math.abs(h);
+    }
+
+    function escapeHtml(str=''){
+      return String(str)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;');
+    }
+
+    function escapeJs(str=''){
+      return String(str).replaceAll("\\","\\\\").replaceAll("'","\\'");
+    }
+
+    function renderAll(){
+      renderPromo();
+      renderGigs();
+      renderVenues();
+      renderSetup();
+    }
+
+    renderAll();
+    showTab('promo');
+  </script>
+</body>
+</html>
